@@ -20,8 +20,8 @@ const routes: Routes = [
       { path: 'cover', component: CoverComponent },
     ],
   },
-  // { path: '', pathMatch: 'full', redirectTo: 'cover' },
-  // { path: '**', redirectTo: 'cover' },
+  { path: '', pathMatch: 'full', redirectTo: 'cover' },
+  { path: '**', redirectTo: 'cover' },
 ];
 
 @NgModule({

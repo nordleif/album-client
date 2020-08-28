@@ -11,7 +11,6 @@ export class RefreshTokenInterceptor implements HttpInterceptor {
   ) { }
 
   public intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    return next.handle(req);
     return next.handle(req).pipe(
       catchError(err =>  err.status === 401
         ? this.authClient.refreshToken().pipe(switchMap(() => next.handle(req)))
