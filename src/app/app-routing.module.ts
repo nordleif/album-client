@@ -6,13 +6,7 @@ import { LoginComponent } from './auth/login/login.component';
 import { CoverComponent } from './cover/cover.component';
 
 const routes: Routes = [
-  {
-    path: '',
-    children: [
-      { path: 'auth/login', component: LoginComponent },
-      { path: 'auth/callback', component: AuthCallbackComponent },
-    ],
-  },
+  { path: '', pathMatch: 'full', redirectTo: 'cover' },
   {
     path: '',
     canActivateChild: [AuthGuard],
@@ -20,7 +14,13 @@ const routes: Routes = [
       { path: 'cover', component: CoverComponent },
     ],
   },
-  { path: '', pathMatch: 'full', redirectTo: 'cover' },
+  {
+    path: '',
+    children: [
+      { path: 'auth/login', component: LoginComponent },
+      { path: 'auth/callback', component: AuthCallbackComponent },
+    ],
+  },
   { path: '**', redirectTo: 'cover' },
 ];
 
