@@ -4,6 +4,7 @@
 
 export const environment = {
   production: false,
+  clientId: '2914b90321254148b57f41438e31d7b3',
   url: 'http://localhost:8080',
 };
 

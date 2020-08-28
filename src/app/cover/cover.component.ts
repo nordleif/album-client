@@ -35,11 +35,9 @@ export class CoverComponent implements OnInit, OnDestroy {
   }
 
   private async doWork() {
-
     this.spotifyClient.getCurrentlyPlaying().pipe(
       take(1),
     ).subscribe(albumArt => {
-      console.log(this.albumUrl);
       this.albumUrl = albumArt;
     });
 

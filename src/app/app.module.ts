@@ -6,6 +6,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AuthCallbackComponent } from './auth/auth-callback/auth-callback.component';
 import { AuthInterceptor } from './auth/auth.interceptor';
+import { LoginComponent } from './auth/login/login.component';
 import { RefreshTokenInterceptor } from './auth/refresh-token.interceptor';
 import { CoverComponent } from './cover/cover.component';
 import { JsonRpcInterceptor } from './json-rpc.interceptor';
@@ -14,8 +15,9 @@ import { JsonRpcInterceptor } from './json-rpc.interceptor';
 @NgModule({
   declarations: [
     AppComponent,
+    LoginComponent,
     AuthCallbackComponent,
-    CoverComponent
+    CoverComponent,
   ],
   imports: [
     BrowserModule,

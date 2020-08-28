@@ -1,18 +1,20 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { map, tap } from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-import { Guid } from '../guid';
-import { JsonRpcRequest, JsonRpcResponse } from '../json-rpc';
 
+const AUTH_ACCESS_TOKEN = 'album_auth_access_token';
+const AUTH_REDIRECT_URL = 'album_auth_redirect_uri';
+const AUTH_REFRESH_TOKEN = 'album_auth_refresh_token';
+const AUTH_STATE = 'album_auth_state';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthClient {
+
   private _accessToken: string;
-  private readonly _clientId = '2914b90321254148b57f41438e31d7b3';
   private _refreshToken: string;
   private readonly _scopes = 'user-read-currently-playing playlist-read-private user-top-read user-read-recently-played';
 
@@ -20,8 +22,8 @@ export class AuthClient {
     private readonly activatedRoute: ActivatedRoute,
     private readonly httpClient: HttpClient,
   ) {
-    this._accessToken = localStorage.getItem('album_auth_access_token');
-    this._refreshToken = localStorage.getItem('album_auth_refresh_token');
+    this._accessToken = localStorage.getItem(AUTH_ACCESS_TOKEN);
+    this._refreshToken = localStorage.getItem(AUTH_REFRESH_TOKEN);
   }
 
   public get accessToken() {
@@ -32,11 +34,11 @@ export class AuthClient {
     const state = this.generateRandomString();
     const redirectUri = 'http://localhost:4200/auth/callback';
 
-    localStorage.setItem('album_auth_state', state);
-    localStorage.setItem('album_auth_redirect_uri', redirectUri);
+    localStorage.setItem(AUTH_STATE, state);
+    localStorage.setItem(AUTH_REDIRECT_URL, redirectUri);
 
     let url = 'https://accounts.spotify.com/authorize';
-    url += `?client_id=${this._clientId}`;
+    url += `?client_id=${environment.clientId}`;
     url += '&response_type=code';
     url += `&redirect_uri=${encodeURIComponent(redirectUri)}`;
     url += `&state=${state}`;
@@ -46,7 +48,6 @@ export class AuthClient {
   }
 
   public handleAuthCallback() {
-
     const responseCode = this.activatedRoute.snapshot.queryParams.code;
     if (!responseCode) {
       throw new Error('queryCode cannot be null');
@@ -57,14 +58,14 @@ export class AuthClient {
       throw new Error('queryState cannot be null.');
     }
 
-    const state = localStorage.getItem('album_auth_state');
-    localStorage.removeItem('album_auth_state');
+    const state = localStorage.getItem(AUTH_STATE);
+    localStorage.removeItem(AUTH_STATE);
     if (!state) {
       throw new Error('state cannot be null.');
     }
 
-    const redirectUri = localStorage.getItem('album_auth_redirect_uri');
-    localStorage.removeItem('album_auth_redirect_uri');
+    const redirectUri = localStorage.getItem(AUTH_REDIRECT_URL);
+    localStorage.removeItem(AUTH_REDIRECT_URL);
     if (!redirectUri) {
       throw new Error('redirectUrl cannot be null.');
     }
@@ -74,23 +75,55 @@ export class AuthClient {
     }
 
     const url = `${environment.url}/api/token`;
-    const request: JsonRpcRequest = {
-      jsonrpc: '2.0',
-      method: 'requestAccessToken',
-      params: {
-        code: responseCode,
-        redirectUri,
-      },
-      id: Guid.newGuid()
+    const body = {
+      grant_type: 'authorization_code',
+      code: responseCode,
+      redirect_uri: redirectUri,
     };
 
-    return this.httpClient.post<JsonRpcResponse>(url, request).pipe(
-      map(r => r.result),
-      tap(r => {
-        this._accessToken = r.access_token;
-        this._refreshToken = r.refresh_token;
-        localStorage.setItem('album_auth_access_token', this._accessToken);
-        localStorage.setItem('album_auth_refresh_token', this._refreshToken);
+    return this.httpClient.post<any>(url, body).pipe(
+      tap((res: any) => {
+        const error = res.error;
+        if (error) {
+          const description = res.error_description;
+          throw new Error(`${error}: ${description}`);
+        }
+      }),
+      tap((res: any) => {
+        this._accessToken = res.access_token;
+        this._refreshToken = res.refresh_token;
+        localStorage.setItem(AUTH_ACCESS_TOKEN, this._accessToken);
+        localStorage.setItem(AUTH_REFRESH_TOKEN, this._refreshToken);
+      }),
+    );
+  }
+
+  public refreshToken() {
+    const refreshToken = localStorage.getItem(AUTH_REFRESH_TOKEN);
+    localStorage.removeItem(AUTH_REFRESH_TOKEN);
+    if (!refreshToken) {
+      throw new Error('refreshToken cannot be null.');
+    }
+
+    const url = `${environment.url}/api/token`;
+    const body = {
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+    };
+
+    return this.httpClient.post<any>(url, body).pipe(
+      tap((res: any) => {
+        const error = res.error;
+        if (error) {
+          const description = res.error_description;
+          throw new Error(`${error}: ${description}`);
+        }
+      }),
+      tap((res: any) => {
+        this._accessToken = res.access_token;
+        this._refreshToken = res.refresh_token;
+        localStorage.setItem(AUTH_ACCESS_TOKEN, this._accessToken);
+        localStorage.setItem(AUTH_REFRESH_TOKEN, this._refreshToken);
       }),
     );
   }
