@@ -1,3 +1,4 @@
+import { Location } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
@@ -21,6 +22,7 @@ export class AuthClient {
   public constructor(
     private readonly activatedRoute: ActivatedRoute,
     private readonly httpClient: HttpClient,
+    private readonly location: Location,
   ) {
     this._accessToken = localStorage.getItem(AUTH_ACCESS_TOKEN);
     this._refreshToken = localStorage.getItem(AUTH_REFRESH_TOKEN);
@@ -32,9 +34,9 @@ export class AuthClient {
 
   public login() {
     const state = this.generateRandomString();
-    const redirectUri = 'http://localhost:4200/auth/callback';
-
     localStorage.setItem(AUTH_STATE, state);
+
+    const redirectUri = document.location.origin + this.location.prepareExternalUrl('auth/callback');
     localStorage.setItem(AUTH_REDIRECT_URL, redirectUri);
 
     let url = 'https://accounts.spotify.com/authorize';
