@@ -102,7 +102,6 @@ export class AuthClient {
 
   public refreshToken() {
     const refreshToken = localStorage.getItem(AUTH_REFRESH_TOKEN);
-    localStorage.removeItem(AUTH_REFRESH_TOKEN);
     if (!refreshToken) {
       throw new Error('refreshToken cannot be null.');
     }
@@ -123,9 +122,7 @@ export class AuthClient {
       }),
       tap((res: any) => {
         this._accessToken = res.access_token;
-        this._refreshToken = res.refresh_token;
         localStorage.setItem(AUTH_ACCESS_TOKEN, this._accessToken);
-        localStorage.setItem(AUTH_REFRESH_TOKEN, this._refreshToken);
       }),
     );
   }

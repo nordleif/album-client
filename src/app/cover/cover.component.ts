@@ -40,6 +40,5 @@ export class CoverComponent implements OnInit, OnDestroy {
     ).subscribe(albumArt => {
       this.albumUrl = albumArt;
     });
-
   }
 }
