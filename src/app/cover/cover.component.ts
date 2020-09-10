@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { timer } from 'rxjs';
-import { take, tap, takeWhile } from 'rxjs/operators';
-import { AuthClient } from '../auth/auth-client';
+import { switchMap, take, takeWhile, tap } from 'rxjs/operators';
+import { PyClient } from '../py-client';
 import { SpotifyClient } from '../spotify-client';
 
 @Component({
@@ -15,19 +15,16 @@ export class CoverComponent implements OnInit, OnDestroy {
   public albumUrl = '';
 
   public constructor(
-    private readonly authClient: AuthClient,
+    private readonly pyClient: PyClient,
     private readonly spotifyClient: SpotifyClient,
   ) { }
 
   public ngOnInit() {
     timer(0, 3000).pipe(
       takeWhile(() => !this._destroy),
-      tap(() => this.doWork()),
-    ).subscribe();
-  }
-
-  public login() {
-    this.authClient.login();
+    ).subscribe(() => {
+      this.doWork();
+    });
   }
 
   public ngOnDestroy() {
@@ -37,8 +34,8 @@ export class CoverComponent implements OnInit, OnDestroy {
   private async doWork() {
     this.spotifyClient.getCurrentlyPlaying().pipe(
       take(1),
-    ).subscribe(albumArt => {
-      this.albumUrl = albumArt;
-    });
+      tap(albumUrl => this.albumUrl = albumUrl),
+      switchMap(albumUrl => albumUrl ? this.pyClient.screenOn() : this.pyClient.screenOff()),
+    ).subscribe();
   }
 }

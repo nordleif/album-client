@@ -4,13 +4,12 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { AuthCallbackComponent } from './auth/auth-callback/auth-callback.component';
-import { AuthInterceptor } from './auth/auth.interceptor';
-import { LoginComponent } from './auth/login/login.component';
-import { RefreshTokenInterceptor } from './auth/refresh-token.interceptor';
+import { AuthCallbackComponent } from './auth-callback/auth-callback.component';
+import { AuthInterceptor } from './auth.interceptor';
+import { LoginComponent } from './login/login.component';
 import { CoverComponent } from './cover/cover.component';
 import { JsonRpcInterceptor } from './json-rpc.interceptor';
-
+import { RefreshTokenInterceptor } from './refresh-token.interceptor';
 
 @NgModule({
   declarations: [

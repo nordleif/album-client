@@ -2,16 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs/operators';
 
-
 @Injectable({
   providedIn: 'root'
 })
 export class SpotifyClient {
   public constructor(
     private readonly httpClient: HttpClient,
-  ) {
-
-  }
+  ) { }
 
   public getCurrentlyPlaying() {
     const url = 'https://api.spotify.com/v1/me/player/currently-playing';
