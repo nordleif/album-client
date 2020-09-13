@@ -6,7 +6,7 @@ import { JsonRpcRequest } from './json-rpc';
 @Injectable({
   providedIn: 'root'
 })
-export class PyClient {
+export class RpcClient {
   public constructor(
     private readonly httpClient: HttpClient,
   ) { }

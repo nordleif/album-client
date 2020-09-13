@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { timer } from 'rxjs';
 import { switchMap, take, takeWhile, tap } from 'rxjs/operators';
-import { PyClient } from '../py-client';
+import { RpcClient } from '../rpc-client';
 import { SpotifyClient } from '../spotify-client';
 
 @Component({
@@ -15,7 +15,7 @@ export class CoverComponent implements OnInit, OnDestroy {
   public albumUrl = '';
 
   public constructor(
-    private readonly pyClient: PyClient,
+    private readonly rpcClient: RpcClient,
     private readonly spotifyClient: SpotifyClient,
   ) { }
 
@@ -34,8 +34,9 @@ export class CoverComponent implements OnInit, OnDestroy {
   private async doWork() {
     this.spotifyClient.getCurrentlyPlaying().pipe(
       take(1),
-      tap(albumUrl => this.albumUrl = albumUrl),
-      switchMap(albumUrl => albumUrl ? this.pyClient.screenOn() : this.pyClient.screenOff()),
+      // tap(playing => console.log(playing)),
+      tap(playing => this.albumUrl = playing.isPlaying ? playing.albumUrl : undefined),
+      switchMap(playing => playing.isPlaying ? this.rpcClient.screenOn() : this.rpcClient.screenOff()),
     ).subscribe();
   }
 }
