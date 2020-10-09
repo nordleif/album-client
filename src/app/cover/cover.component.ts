@@ -1,6 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { timer } from 'rxjs';
+import { of, timer } from 'rxjs';
 import { switchMap, take, takeWhile, tap } from 'rxjs/operators';
+import { environment } from 'src/environments/environment';
+import { Guid } from '../guid';
 import { RpcClient } from '../rpc-client';
 import { SpotifyClient } from '../spotify-client';
 
@@ -34,9 +36,15 @@ export class CoverComponent implements OnInit, OnDestroy {
   private async doWork() {
     this.spotifyClient.getCurrentlyPlaying().pipe(
       take(1),
-      // tap(playing => console.log(playing)),
+      switchMap(playing => {
+        if (!playing.isPlaying) {
+          playing.isPlaying = true;
+          playing.albumUrl = `${environment.url}/api/movie/next-frame?${Guid.newGuid()}`;
+        }
+        return of(playing);
+      }),
       tap(playing => this.albumUrl = playing.isPlaying ? playing.albumUrl : undefined),
-      switchMap(playing => playing.isPlaying ? this.rpcClient.screenOn() : this.rpcClient.screenOff()),
+      // switchMap(playing => playing.isPlaying ? this.rpcClient.screenOn() : this.rpcClient.screenOff()),
     ).subscribe();
   }
 }
